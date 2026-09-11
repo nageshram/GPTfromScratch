@@ -1,4 +1,4 @@
-# GPT from Scratch 🚀
+# GPT from Scratch 
 
 A character-level Generative Pre-trained Transformer (GPT) language model built from scratch in PyTorch, inspired by the *"Attention Is All You Need"* paper and Andrej Karpathy's *Neural Networks: Zero to Hero* lecture series.
 
@@ -14,7 +14,7 @@ A character-level Generative Pre-trained Transformer (GPT) language model built 
 
 ---
 
-## 🏗️ Model Architecture & Hyperparameters
+## Model Architecture & Hyperparameters
 
 | Hyperparameter | Description | Value |
 | :--- | :--- | :--- |
