@@ -200,64 +200,66 @@ class BigramLanguageModel(nn.Module):
             idx = torch.cat([idx, next_token], dim=1) # appends the next token to the sequence 
         return idx
 
-model = BigramLanguageModel(vocab_size)
-m = model.to(device)
+if __name__ == '__main__': # prevents training when this file is imported 
+    model = BigramLanguageModel(vocab_size)
+    m = model.to(device)
 
-@torch.no_grad()
-def estimate_loss():
-    out = {}
-    model.eval()
-    for split in ['train', 'val']:
-        losses = torch.zeros(eval_iters)
-        for k in range(eval_iters):
-            X, Y = get_batch(split)
-            logits, loss = model(X, Y)
-            losses[k] = loss.item()
-        out[split] = losses.mean().item()
-    model.train()
-    return out
+    @torch.no_grad()
+    def estimate_loss():
+        out = {}
+        model.eval()
+        for split in ['train', 'val']:
+            losses = torch.zeros(eval_iters)
+            for k in range(eval_iters):
+                X, Y = get_batch(split)
+                logits, loss = model(X, Y)
+                losses[k] = loss.item()
+            out[split] = losses.mean().item()
+        model.train()
+        return out
 
-optimizer = torch.optim.AdamW(model.parameters(), lr=learning_rate) # 1e-3
+    optimizer = torch.optim.AdamW(model.parameters(), lr=learning_rate) # 1e-3
 
-for iter in range(max_iters):
+    for iter in range(max_iters):
 
-    # every once in a while evaluate the loss on train and val sets
-    if iter % eval_interval == 0:
-        losses = estimate_loss()
-        print(f"step {iter}: train loss {losses['train']:.4f}, val loss {losses['val']:.4f}")
+        # every once in a while evaluate the loss on train and val sets
+        if iter % eval_interval == 0:
+            losses = estimate_loss()
+            print(f"step {iter}: train loss {losses['train']:.4f}, val loss {losses['val']:.4f}")
 
-    xb, yb = get_batch('train')
-    logits, loss = model(xb, yb)
-    optimizer.zero_grad(set_to_none=True)
-    loss.backward()
-    optimizer.step()
+        xb, yb = get_batch('train')
+        logits, loss = model(xb, yb)
+        optimizer.zero_grad(set_to_none=True)
+        loss.backward()
+        optimizer.step()
 
-# final evaluation
-losses = estimate_loss()
-print(f"step {max_iters}: train loss {losses['train']:.4f}, val loss {losses['val']:.4f}")
+    # final evaluation
+    losses = estimate_loss()
+    print(f"step {max_iters}: train loss {losses['train']:.4f}, val loss {losses['val']:.4f}")
 
-print("\n--- Generating text from trained model ---")
-context = torch.zeros((1, 1), dtype=torch.long, device=device)
-out = model.generate(context, 100)
-print("".join([itos[i] for i in out[0].tolist()]))
+    print("\n--- Generating text from trained model ---")
+    context = torch.zeros((1, 1), dtype=torch.long, device=device)
+    out = model.generate(context, 100)
+    print("".join([itos[i] for i in out[0].tolist()]))
 
-# Save model checkpoint and metadata to pickle file
-checkpoint = {
-    'model_state_dict': model.state_dict(),
-    'config': {
-        'vocab_size': vocab_size,
-        'n_embed': n_embed,
-        'block_size': block_size,
-        'num_heads': num_heads,
-        'head_size': head_size,
-        'n_layer': n_layer,
-        'dropout_rate': dropout_rate,
-    },
-    'stoi': stoi,
-    'itos': itos
-}
-torch.save(checkpoint, 'model.pkl')
-print("\nModel saved successfully to model.pkl")
+    # Save model checkpoint and metadata to pickle file
+    checkpoint = {
+        'model_state_dict': model.state_dict(),
+        'config': {
+            'vocab_size': vocab_size,
+            'n_embed': n_embed,
+            'block_size': block_size,
+            'num_heads': num_heads,
+            'head_size': head_size,
+            'n_layer': n_layer,
+            'dropout_rate': dropout_rate,
+        },
+        'stoi': stoi,
+        'itos': itos
+    }
+    torch.save(checkpoint, 'model.pkl')
+    print("\nModel saved successfully to model.pkl")
+
 
 
         
