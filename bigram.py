@@ -167,7 +167,7 @@ class BigramLanguageModel(nn.Module):
         super().__init__()
         self.token_embedding = torch.nn.Embedding(vocab_size, n_embed)
         self.positional_embedding = torch.nn.Embedding(block_size, n_embed) # for each position in the block size will get the vectors representing that position
-        self.blocks = nn.Sequential(*[Block(n_embed, num_heads=num_heads) for _ in range(n_layer)]) # multi head self attention
+        self.blocks = nn.Sequential(*[Block(n_embed, num_heads=num_heads) for _ in range(n_layer)]) # multi head self attention, '*' make the iterable list into individual elements separated by comma ( as expected by Sequential()
         self.ln_f = nn.LayerNorm(n_embed)  # final layer normalization
         self.lm_head = torch.nn.Linear(n_embed, vocab_size) # linear layer to map the output of the self attention to the vocabulary size 
 
